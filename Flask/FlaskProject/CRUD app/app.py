@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -22,11 +22,14 @@ class Employee(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def home():
-    employee = Employee(name="Denji", email="denji@gmail.com")
-    db.session.add(employee)
-    db.session.commit()
+    if request.method == "POST":
+        name = request.form['name']
+        email = request.form['email']
+        employee = Employee(name=name, email=email)
+        db.session.add(employee)
+        db.session.commit()
 
     employees = Employee.query.all()
     return render_template("index.html", employees=employees)
@@ -35,6 +38,15 @@ def home():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/delete/<int:sno>")
+def delete(sno):
+    employee = Employee.query.filter_by(sno=sno).first()
+    db.session.delete(employee)
+    db.session.commit()
+    return redirect("/")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
