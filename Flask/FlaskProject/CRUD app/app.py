@@ -47,6 +47,21 @@ def delete(sno):
     db.session.commit()
     return redirect("/")
 
+@app.route("/update/<int:sno>", methods=['GET', 'POST'])
+def update(sno):
+    if request.method == "POST":
+        name = request.form['name']
+        email = request.form['email']
+        employee = Employee.query.filter_by(sno=sno).first()
+        employee.name = name
+        employee.email = email
+        db.session.add(employee)
+        db.session.commit()
+        return redirect("/")
+    
+    employee  = Employee.query.filter_by(sno=sno).first()
+    return render_template("update.html", employee = employee)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
